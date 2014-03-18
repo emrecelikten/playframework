@@ -152,7 +152,12 @@ object WS {
      * Return the current query string parameters
      */
     def queryString: Map[String, Seq[String]] = {
-      mapAsScalaMapConverter(request.asInstanceOf[com.ning.http.client.Request].getParams()).asScala.map(e => e._1 -> e._2.asScala.toSeq).toMap
+      Option(request.asInstanceOf[com.ning.http.client.Request].getQueryParams) match {
+        case Some(params) =>
+          mapAsScalaMapConverter(params).asScala.map(e => e._1 -> e._2.asScala.toSeq).toMap
+        case None =>
+          Map.empty[String, Seq[String]]
+      }
     }
 
     /**

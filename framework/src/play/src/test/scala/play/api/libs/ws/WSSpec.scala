@@ -8,6 +8,7 @@ import com.ning.http.client.{
   Cookie => AHCCookie
 }
 import java.util
+import play.api.libs.ws.WS.WSRequest
 
 object WSSpec extends Specification with Mockito {
 
@@ -62,6 +63,21 @@ object WSSpec extends Specification with Mockito {
         cookie.maxAge must ===(1000)
         cookie.secure must beFalse
       }
+    }
+
+    "not throw an exception while accessing queryString" in {
+
+      object CustomSigner extends SignatureCalculator {
+        override def sign(request: WSRequest): Unit = {
+          val queryString = request.queryString
+        }
+      }
+
+      val requestHolder1 = WS.url("localhost").withQueryString("lorem" -> "ipsum").sign(CustomSigner)
+      requestHolder1.get() must not(throwA[NullPointerException])
+
+      val requestHolder2 = WS.url("localhost").sign(CustomSigner)
+      requestHolder2.get() must not(throwA[NullPointerException])
     }
   }
 
